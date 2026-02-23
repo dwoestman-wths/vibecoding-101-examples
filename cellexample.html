@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic School Bus: Mini Plant Cell Adventure!</title>
+    <style>
+        :root {
+            --cell-wall: #388E3C;
+            --cytoplasm: #E1F5FE;
+            --nucleus: #FF3D00;
+            --vacuole: #00E5FF;
+            --chloroplast: #76FF03;
+            --mitochondria: #6A1B9A;
+            --ribosome: #FFD600;
+            --text-color: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+            background-color: #FFFDE7;
+            background-image: radial-gradient(#FFEB3B 1px, transparent 1px);
+            background-size: 15px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+            margin: 0;
+            color: var(--text-color);
+        }
+
+        .header-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: #D32F2F;
+            font-size: 1.5rem; /* Half size */
+            text-shadow: 2px 2px 0px #FFF;
+            margin: 0;
+            transform: rotate(-2deg);
+        }
+
+        .instruction {
+            display: inline-block;
+            background: #FF5252;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 25px;
+            border: 2px solid #B71C1C;
+            margin-top: 8px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+        }
+
+        /* The Cell Container - Scaled to 275x250 */
+        #cell-container {
+            position: relative;
+            width: 275px;
+            height: 250px;
+            background-color: var(--cell-wall);
+            border: 6px solid #1B5E20;
+            border-radius: 65% 35% 72% 28% / 32% 69% 31% 68%;
+            box-shadow: 8px 8px 0px #81C784;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: cellWobble 10s infinite ease-in-out;
+            padding: 10px;
+        }
+
+        .cytoplasm {
+            position: relative;
+            width: 95%;
+            height: 95%;
+            background-color: var(--cytoplasm);
+            border-radius: 60% 40% 65% 35% / 35% 65% 35% 65%;
+            border: 3px dashed #81D4FA;
+            overflow: hidden;
+        }
+
+        /* Organelle Base Styling - Scaled Down */
+        .organelle {
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 9px; /* Smaller font */
+            border: 2px solid rgba(0,0,0,0.3);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .organelle:hover {
+            transform: scale(1.15) rotate(5deg);
+            filter: brightness(1.2);
+            z-index: 50;
+        }
+
+        .nucleus {
+            width: 60px;
+            height: 60px;
+            background-color: var(--nucleus);
+            border-radius: 50%;
+            top: 20px;
+            left: 20px;
+            box-shadow: inset -5px -5px 0px rgba(0,0,0,0.1);
+        }
+
+        .vacuole {
+            width: 110px;
+            height: 80px;
+            background-color: var(--vacuole);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            bottom: 15px;
+            right: 15px;
+            animation: organelleWobble 6s infinite ease-in-out;
+            box-shadow: inset -8px -8px 0px rgba(0,0,0,0.1);
+        }
+
+        .chloroplast {
+            width: 40px;
+            height: 25px;
+            background-color: var(--chloroplast);
+            border-radius: 50% / 60% 60% 40% 40%;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 5px, rgba(0,0,0,0.1) 5px, rgba(0,0,0,0.1) 6px);
+        }
+
+        .mitochondria {
+            width: 32px;
+            height: 20px;
+            background-color: var(--mitochondria);
+            border-radius: 15px;
+            color: white;
+            background-image: radial-gradient(circle at 50% 50%, transparent 80%, rgba(255,255,255,0.2) 80%);
+        }
+
+        .ribosome {
+            width: 8px;
+            height: 8px;
+            background-color: var(--ribosome);
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        /* Googly Info Box - Scaled Down */
+        #info-box {
+            margin-top: 20px;
+            width: 260px;
+            min-height: 60px;
+            background: #FFF;
+            border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
+            border: 4px solid #FF9800;
+            padding: 15px 20px;
+            text-align: center;
+            display: none;
+            box-shadow: 6px 6px 0px #FFD180;
+            position: relative;
+        }
+
+        #info-box.active {
+            display: block;
+            animation: popAndWobble 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #info-box::before {
+            content: "👀";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+        }
+
+        /* Video Link Section - Scaled Down */
+        .video-section {
+            margin-top: 25px;
+            background: #673AB7;
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 2px solid #311B92;
+            text-align: center;
+            box-shadow: 4px 4px 0px #D1C4E9;
+        }
+
+        .video-section h3 {
+            color: #FFF;
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .video-link {
+            display: inline-block;
+            background: #FFEB3B;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.8rem;
+            border: 2px solid #000;
+            transition: transform 0.2s;
+        }
+
+        .video-link:hover {
+            transform: scale(1.1) rotate(-3deg);
+            background: #FFF176;
+        }
+
+        /* Animations */
+        @keyframes cellWobble {
+            0%, 100% { border-radius: 65% 35% 72% 28% / 32% 69% 31% 68%; }
+            33% { border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%; }
+            66% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+        }
+
+        @keyframes organelleWobble {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            50% { border-radius: 60% 40% 30% 70% / 50% 60% 50% 40%; }
+        }
+
+        @keyframes popAndWobble {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>Mini Cell Trip!</h1>
+        <div class="instruction">Tap the organelles!</div>
+    </div>
+
+    <div id="cell-container">
+        <div class="cytoplasm">
+            <div class="organelle nucleus" onclick="showFact('The Nucleus', 'I\'m the Boss! I hold the DNA, the secret recipe for making more plants.')">Nuc</div>
+            
+            <div class="organelle vacuole" onclick="showFact('The Central Vacuole', 'I\'m a giant water tank! I keep the plant standing tall.')">Vac</div>
+            
+            <div class="organelle chloroplast" style="top: 110px; left: 20px;" onclick="showFact('Chloroplast', 'Solar power! I turn sunlight into snacks.')"></div>
+            <div class="organelle chloroplast" style="top: 170px; left: 70px;" onclick="showFact('Chloroplast', 'I give plants their green color!')"></div>
+            
+            <div class="organelle mitochondria" style="top: 30px; right: 50px;" onclick="showFact('Mitochondria', 'The Powerhouse! I turn food into energy!')"></div>
+            <div class="organelle mitochondria" style="top: 100px; right: 70px;" onclick="showFact('Mitochondria', 'Vroom vroom! I keep things running.')"></div>
+
+            <div class="organelle ribosome" style="top: 75px; left: 90px;" onclick="showFact('Ribosome', 'Protein machines! We build the cell.')"></div>
+            <div class="organelle ribosome" style="top: 160px; right: 45px;" onclick="showFact('Ribosome', 'Small dots, big builder jobs!')"></div>
+        </div>
+    </div>
+
+    <div id="info-box">
+        <h2 id="fact-title" style="margin: 0; color: #E65100; font-size: 1rem;">Click one!</h2>
+        <p id="fact-text" style="margin: 8px 0 0 0; font-size: 0.85rem; line-height: 1.3; color: #333;"></p>
+    </div>
+
+    <div class="video-section">
+        <h3>Watch a movie!</h3>
+        <a href="https://www.youtube.com/watch?v=URUJD5NEXC8" target="_blank" class="video-link">📺 Watch Video</a>
+    </div>
+
+    <script>
+        function showFact(name, fact) {
+            const box = document.getElementById('info-box');
+            const title = document.getElementById('fact-title');
+            const text = document.getElementById('fact-text');
+            
+            box.style.display = 'none';
+            void box.offsetWidth;
+            box.style.display = 'block';
+            
+            box.classList.add('active');
+            title.innerText = name;
+            text.innerText = fact;
+        }
+    </script>
+</body>
+</html>

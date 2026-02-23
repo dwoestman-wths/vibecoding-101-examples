@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plot Structure Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .pyramid-path {
+            transition: all 0.3s ease;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 2s ease forwards;
+        }
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+        .clickable-zone {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .clickable-zone:hover {
+            opacity: 0.8;
+            stroke: #6366f1 !important;
+        }
+        /* Styling for active lines and dots */
+        .active-segment {
+            stroke: #4f46e5 !important;
+            stroke-width: 8 !important;
+            filter: drop-shadow(0 0 8px rgba(79, 70, 229, 0.4));
+        }
+        /* Specific highlighting for active text labels */
+        text.active-segment {
+            stroke: none !important;
+            fill: #4f46e5 !important;
+            font-weight: 900 !important;
+        }
+        /* Circle-specific active state */
+        circle.active-segment {
+            fill: #4f46e5 !important;
+            stroke: #c7d2fe !important;
+            stroke-width: 4 !important;
+        }
+        .quiz-option {
+            transition: transform 0.1s;
+        }
+        .quiz-option:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans text-slate-900">
+
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-slate-800 mb-2">Plot Structure Explorer</h1>
+            <p class="text-slate-600 max-w-2xl mx-auto">
+                Explore the causal arrangement of events that make up a story using <strong>Freytag's Pyramid</strong>.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left: Interactive Diagram -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-xl p-6 border border-slate-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-700" id="diagram-title">Interactive Pyramid</h2>
+                    <button id="toggle-quiz" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md">
+                        Try Quiz Mode
+                    </button>
+                </div>
+
+                <div class="relative aspect-[16/9] w-full bg-slate-50 rounded-xl border border-dashed border-slate-300 flex items-center justify-center p-4">
+                    <svg viewBox="0 0 800 400" class="w-full h-full drop-shadow-sm" id="plot-svg">
+                        <!-- Connecting Lines -->
+                        <g id="segments">
+                            <line x1="50" y1="320" x2="200" y2="320" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round" class="clickable-zone pyramid-path" data-key="exposition" />
+                            <line x1="200" y1="320" x2="400" y2="80" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round" class="clickable-zone pyramid-path" data-key="risingAction" />
+                            <line x1="400" y1="80" x2="600" y2="320" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round" class="clickable-zone pyramid-path" data-key="fallingAction" />
+                            <line x1="600" y1="320" x2="750" y2="320" stroke="#cbd5e1" stroke-width="5" stroke-linecap="round" class="clickable-zone pyramid-path" data-key="resolution" />
+                        </g>
+
+                        <!-- Anchor Point Circles -->
+                        <g id="dots">
+                            <!-- Exposition Point -->
+                            <circle cx="125" cy="320" r="10" fill="white" stroke="#94a3b8" stroke-width="3" class="clickable-zone" data-key="exposition" />
+                            <!-- Rising Action Point -->
+                            <circle cx="300" cy="200" r="10" fill="white" stroke="#94a3b8" stroke-width="3" class="clickable-zone" data-key="risingAction" />
+                            <!-- Climax Point (Keep slightly larger) -->
+                            <circle cx="400" cy="80" r="14" fill="white" stroke="#6366f1" stroke-width="4" class="clickable-zone" data-key="climax" id="climax-dot" />
+                            <!-- Falling Action Point -->
+                            <circle cx="500" cy="200" r="10" fill="white" stroke="#94a3b8" stroke-width="3" class="clickable-zone" data-key="fallingAction" />
+                            <!-- Resolution Point -->
+                            <circle cx="675" cy="320" r="10" fill="white" stroke="#94a3b8" stroke-width="3" class="clickable-zone" data-key="resolution" />
+                        </g>
+                        
+                        <!-- Text Labels (Interactive) -->
+                        <text x="125" y="360" text-anchor="middle" class="clickable-zone text-xs font-bold fill-slate-400 select-none hover:fill-indigo-500" data-key="exposition">EXPOSITION</text>
+                        <text x="260" y="220" text-anchor="middle" transform="rotate(-50, 260, 220)" class="clickable-zone text-xs font-bold fill-slate-400 select-none hover:fill-indigo-500" data-key="risingAction">RISING ACTION</text>
+                        <text x="400" y="50" text-anchor="middle" class="clickable-zone text-sm font-black fill-indigo-600 select-none" data-key="climax">CLIMAX</text>
+                        <text x="540" y="220" text-anchor="middle" transform="rotate(50, 540, 220)" class="clickable-zone text-xs font-bold fill-slate-400 select-none hover:fill-indigo-500" data-key="fallingAction">FALLING ACTION</text>
+                        <text x="675" y="360" text-anchor="middle" class="clickable-zone text-xs font-bold fill-slate-400 select-none hover:fill-indigo-500" data-key="resolution">RESOLUTION</text>
+                    </svg>
+
+                    <!-- Feedback Overlay for Quiz -->
+                    <div id="quiz-feedback" class="hidden absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl">
+                        <div class="text-center p-6 scale-up">
+                            <div id="feedback-icon" class="text-6xl mb-4"></div>
+                            <div id="feedback-text" class="text-2xl font-bold text-slate-800"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="mt-4 text-center text-sm text-slate-500 italic">
+                    Tip: The circles mark the key interactive zones for each plot component.
+                </p>
+            </div>
+
+            <!-- Right: Info Panel -->
+            <div class="lg:col-span-1 space-y-6">
+                <div id="info-panel" class="bg-white rounded-2xl shadow-xl p-6 border border-slate-200 h-full flex flex-col">
+                    <div id="default-msg" class="text-center py-20">
+                        <div class="bg-indigo-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800">Get Started</h3>
+                        <p class="text-slate-500">Click a dot, line, or label on the pyramid to see its role in the story.</p>
+                    </div>
+
+                    <div id="data-panel" class="hidden">
+                        <span id="part-tag" class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4"></span>
+                        <h2 id="part-title" class="text-3xl font-black text-slate-800 mb-4"></h2>
+                        <div class="prose prose-slate mb-8">
+                            <p id="part-desc" class="text-lg text-slate-600 leading-relaxed"></p>
+                        </div>
+                        
+                        <div class="mt-auto pt-6 border-t border-slate-100">
+                            <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Example Application</h4>
+                            <p id="part-example" class="text-sm text-slate-500 italic bg-slate-50 p-4 rounded-xl border border-slate-100"></p>
+                        </div>
+                    </div>
+
+                    <div id="quiz-panel" class="hidden">
+                        <h2 class="text-2xl font-black text-slate-800 mb-2">Knowledge Check</h2>
+                        <p class="text-slate-600 mb-6" id="quiz-question"></p>
+                        <div id="quiz-options" class="space-y-3">
+                            <!-- Injected by JS -->
+                        </div>
+                        <div class="mt-8 text-center">
+                            <span id="score-display" class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Score: 0/0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-slate-400 text-sm">
+            Based on ReadWriteThink & International Reading Association guidelines.
+        </footer>
+    </div>
+
+    <script>
+        const plotData = {
+            exposition: {
+                title: "Exposition",
+                tag: "The Setup",
+                color: "bg-blue-100 text-blue-600",
+                desc: "The start of the story. It describes the way things are before the action begins. It introduces the characters, setting, and the basic situation.",
+                example: "Once upon a time, a young girl named Little Red Riding Hood lived in a village near a deep, dark forest."
+            },
+            risingAction: {
+                title: "Rising Action",
+                tag: "Building Tension",
+                color: "bg-orange-100 text-orange-600",
+                desc: "The series of conflicts and crises in the story that lead to the climax. This is where obstacles are introduced and the plot thickens.",
+                example: "The wolf tricks Red, races to her grandmother's house, and devours the grandmother before disguising himself."
+            },
+            climax: {
+                title: "Climax",
+                tag: "Turning Point",
+                color: "bg-red-100 text-red-600",
+                desc: "The most intense moment—either mentally or in action. It is the turning point where the outcome of the main conflict is decided.",
+                example: "The wolf reveals himself to Little Red Riding Hood and is just about to attack her."
+            },
+            fallingAction: {
+                title: "Falling Action",
+                tag: "The Aftermath",
+                color: "bg-purple-100 text-purple-600",
+                desc: "All of the action which follows the climax. The tension begins to subside as the story moves toward a resolution.",
+                example: "A passing woodcutter hears the commotion, rushes in, and saves Red by stopping the wolf."
+            },
+            resolution: {
+                title: "Resolution",
+                tag: "The End",
+                color: "bg-green-100 text-green-600",
+                desc: "The conclusion and the tying together of all the threads. It shows how the world has changed since the exposition.",
+                example: "Red learns her lesson about talking to strangers, and she and her grandmother share a safe meal together."
+            }
+        };
+
+        let isQuizMode = false;
+        let score = 0;
+        let totalAsked = 0;
+        let currentTarget = null;
+
+        const infoPanel = document.getElementById('info-panel');
+        const defaultMsg = document.getElementById('default-msg');
+        const dataPanel = document.getElementById('data-panel');
+        const quizPanel = document.getElementById('quiz-panel');
+        const diagramTitle = document.getElementById('diagram-title');
+        const toggleBtn = document.getElementById('toggle-quiz');
+
+        function updateScore() {
+            document.getElementById('score-display').innerText = `Score: ${score}/${totalAsked}`;
+        }
+
+        function showPart(key) {
+            if (isQuizMode) return;
+            
+            const data = plotData[key];
+            defaultMsg.classList.add('hidden');
+            dataPanel.classList.remove('hidden');
+
+            document.getElementById('part-title').innerText = data.title;
+            document.getElementById('part-tag').innerText = data.tag;
+            document.getElementById('part-tag').className = `inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 ${data.color}`;
+            document.getElementById('part-desc').innerText = data.desc;
+            document.getElementById('part-example').innerText = data.example;
+
+            // Remove previous active highlights
+            document.querySelectorAll('.active-segment').forEach(el => el.classList.remove('active-segment'));
+            
+            // Highlight ALL elements associated with this key
+            document.querySelectorAll(`[data-key="${key}"]`).forEach(el => {
+                el.classList.add('active-segment');
+            });
+        }
+
+        function startQuiz() {
+            const keys = Object.keys(plotData);
+            currentTarget = keys[Math.floor(Math.random() * keys.length)];
+            const targetData = plotData[currentTarget];
+
+            document.getElementById('quiz-question').innerHTML = `Which part of the diagram represents <strong>"${targetData.title}"</strong>? Click its circle, line, or label!`;
+            
+            document.querySelectorAll('.active-segment').forEach(el => el.classList.remove('active-segment'));
+        }
+
+        function handleQuizClick(key) {
+            if (!isQuizMode) return;
+
+            totalAsked++;
+            const feedback = document.getElementById('quiz-feedback');
+            const fIcon = document.getElementById('feedback-icon');
+            const fText = document.getElementById('feedback-text');
+            
+            feedback.classList.remove('hidden');
+
+            if (key === currentTarget) {
+                score++;
+                fIcon.innerText = "✅";
+                fText.innerText = "Correct!";
+                fText.className = "text-2xl font-bold text-green-600";
+            } else {
+                fIcon.innerText = "❌";
+                fText.innerText = `Incorrect. That was the ${plotData[key].title}.`;
+                fText.className = "text-2xl font-bold text-red-600";
+            }
+
+            updateScore();
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+                startQuiz();
+            }, 1500);
+        }
+
+        // Initialize Event Listeners for all clickable zones
+        document.querySelectorAll('.clickable-zone').forEach(el => {
+            el.addEventListener('click', () => {
+                const key = el.getAttribute('data-key');
+                if (isQuizMode) {
+                    handleQuizClick(key);
+                } else {
+                    showPart(key);
+                }
+            });
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            isQuizMode = !isQuizMode;
+            if (isQuizMode) {
+                toggleBtn.innerText = "Exit Quiz";
+                toggleBtn.classList.replace('bg-indigo-600', 'bg-slate-600');
+                diagramTitle.innerText = "Quiz: Locate the Phase";
+                dataPanel.classList.add('hidden');
+                defaultMsg.classList.add('hidden');
+                quizPanel.classList.remove('hidden');
+                score = 0;
+                totalAsked = 0;
+                updateScore();
+                startQuiz();
+            } else {
+                toggleBtn.innerText = "Try Quiz Mode";
+                toggleBtn.classList.replace('bg-slate-600', 'bg-indigo-600');
+                diagramTitle.innerText = "Interactive Pyramid";
+                quizPanel.classList.add('hidden');
+                defaultMsg.classList.remove('hidden');
+                document.querySelectorAll('.active-segment').forEach(el => el.classList.remove('active-segment'));
+            }
+        });
+
+    </script>
+</body>
+</html>
